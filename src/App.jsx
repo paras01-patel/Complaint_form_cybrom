@@ -163,6 +163,7 @@ function ThankYouPage({ userName = "Student", ticketNumber = null }) {
       </div>
     </div>
   );
-}
+
+};
 
 export default ThankYouPage;
