@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, Clock, Loader2, AlertCircle } from "lucide-react";
 
 function ComplaintForm({ onBackClick }) {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   
   const [formData, setFormData] = useState({
     fullName: "",
@@ -16,12 +18,39 @@ function ComplaintForm({ onBackClick }) {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errorMsg) setErrorMsg(""); // Clear error when typing
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    setSubmitted(true);
+    setErrorMsg("");
+
+    // Basic Mobile Number Validation (10 digits)
+    if (formData.phone.replace(/\D/g, "").length < 10) {
+      setErrorMsg("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    setLoading(true);
+
+    // Simulating API / Backend Request Delay (1.5 seconds)
+    setTimeout(() => {
+      console.log("Form Data Submitted Successfully:", formData);
+      setLoading(false);
+      setSubmitted(true);
+    }, 1500);
+  };
+
+  const handleReset = () => {
+    setFormData({
+      fullName: "",
+      email: "",
+      phone: "",
+      course: "",
+      batchTiming: "",
+      description: "",
+    });
+    setSubmitted(false);
   };
 
   return (
@@ -39,13 +68,9 @@ function ComplaintForm({ onBackClick }) {
         {/* Top Header */}
         <div className="flex items-center justify-between mb-8 px-2 flex-wrap gap-4">
           
-          {/* Exact Logo Container from Wellcome Component */}
+          {/* Logo Container */}
           <div className="inline-flex items-center bg-[#0d121c]/90 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-lg shadow-xl hover:border-blue-500/20 transition-all">
-            
-            {/* Cybrom Logo Match */}
             <div className="flex items-center text-xl md:text-2xl font-bold tracking-tight gap-1">
-              
-              {/* Exact Segmented Multi-color 'C' Icon */}
               <div className="relative w-8 h-8 flex items-center justify-center">
                 <svg className="w-full h-full drop-shadow-md" viewBox="0 0 100 100">
                   <path d="M50,50 L85,15 A50,50 0 0,0 50,0 Z" fill="#F49E4C" />
@@ -54,9 +79,7 @@ function ComplaintForm({ onBackClick }) {
                   <path d="M50,50 L15,85 A50,50 0 0,1 0,50 Z" fill="#1C5E8A" />
                   <path d="M50,50 L0,50 A50,50 0 0,1 15,15 Z" fill="#4392B9" />
                   <path d="M50,50 L15,15 A50,50 0 0,1 50,0 Z" fill="#69B3E7" />
-                  
                   <circle cx="50" cy="50" r="30" fill="#05070b" />
-                  
                   <path d="M50,50 L65,35 A20,20 0 0,0 50,30 Z" fill="#F49E4C" />
                   <path d="M50,50 L50,30 A20,20 0 0,1 70,50 Z" fill="#4392B9" />
                   <path d="M50,50 L70,50 A20,20 0 0,1 65,65 Z" fill="#EA7317" />
@@ -65,17 +88,13 @@ function ComplaintForm({ onBackClick }) {
                   <path d="M50,50 L30,50 A20,20 0 0,1 35,35 Z" fill="#69B3E7" />
                 </svg>
               </div>
-
-              {/* ybrom text */}
               <span className="text-orange-400 font-extrabold tracking-tight">
                 y<span className="text-[#0092ff]">brom</span>
               </span>
             </div>
 
-            {/* Vertical Line */}
             <div className="h-6 w-[1px] bg-white/20 mx-3"></div>
 
-            {/* Technology Pvt. Ltd. */}
             <div className="text-left flex flex-col justify-center gap-0.5">
               <span className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] text-gray-200 uppercase leading-tight">
                 TECHNOLOGY
@@ -119,6 +138,14 @@ function ComplaintForm({ onBackClick }) {
                   Please fill out the form below. Our team will review your issue and respond within 24 hours.
                 </p>
               </div>
+
+              {/* Error Notification Banner if any */}
+              {errorMsg && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 
@@ -191,7 +218,7 @@ function ComplaintForm({ onBackClick }) {
                 {/* Row 3: Class Timing */}
                 <div>
                     <label className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
-                       Preferred / Current Class Timing <span className="text-orange-500">*</span>
+                        Preferred / Current Class Timing <span className="text-orange-500">*</span>
                     </label>
                     <div className="relative">
                         <Clock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
@@ -227,15 +254,25 @@ function ComplaintForm({ onBackClick }) {
                 <div className="pt-3">
                   <button
                     type="submit"
+                    disabled={loading}
                     className="w-full group inline-flex items-center justify-center gap-2.5
                     bg-orange-500 hover:bg-orange-400
                     text-black font-bold text-sm md:text-base
                     py-4 rounded-xl
                     transition-all duration-300
-                    shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer"
+                    shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer disabled:opacity-50"
                   >
-                    <Send size={18} className="group-hover:translate-x-1 transition-transform" />
-                    Submit Complaint
+                    {loading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Submitting Ticket...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} className="group-hover:translate-x-1 transition-transform" />
+                        Submit Complaint
+                      </>
+                    )}
                   </button>
                 </div>
 
@@ -253,7 +290,7 @@ function ComplaintForm({ onBackClick }) {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <button
-                  onClick={() => setSubmitted(false)}
+                  onClick={handleReset}
                   className="bg-[#141b29] hover:bg-[#1a2336] text-white font-semibold text-sm px-8 py-4 rounded-xl border border-white/10 transition-all cursor-pointer"
                 >
                   Register Another
